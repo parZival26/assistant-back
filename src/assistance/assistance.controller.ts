@@ -40,7 +40,7 @@ export class AssistanceController {
     const qrCodeDataURL = await this.assistanceService.generateAssistanceQRCode(eventIdNumber, userId);
 
     //transform qr
-    return `<img src="${qrCodeDataURL}" alt="QR Code" />`;
+    return { qrCodeDataURL };
   
 
   }

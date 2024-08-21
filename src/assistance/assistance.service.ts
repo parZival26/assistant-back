@@ -101,7 +101,6 @@ export class AssistanceService {
   }
 
   async generateAssistanceQRCode(eventId: number, userId: number) {
-    try {
       const event = await this.prismaService.event.findUnique({
         where: { id: eventId },
         select: {
@@ -133,19 +132,24 @@ export class AssistanceService {
         throw new UnprocessableEntityException('User does not exist');
       }
 
+      const EventUser = await this.prismaService.eventUser.findUnique({
+        where: {
+          userId_eventId: {
+            eventId,
+            userId
+          }
+        }
+      });
+
+      if (!EventUser) {
+        throw new UnprocessableEntityException('User is not registered in the event');
+      }
+
       const deadLineCode = event.finalDate.getHours() + 1;
       const hashCode = encrypt(`${userId}-${eventId}-${deadLineCode}`);
       const qr = await qrcode.toDataURL(hashCode);
 
       return qr;
-
-
-      
-    } catch (error) {
-      console.log(error);
-      
-      throw new InternalServerErrorException();
-    }
   }
 
 
