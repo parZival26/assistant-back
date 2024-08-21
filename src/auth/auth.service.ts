@@ -15,7 +15,7 @@ export class AuthService {
         private readonly userService: UserService 
     ) {}
 
-    async login(loginDto: LoginDto): Promise<string> {
+    async login(loginDto: LoginDto): Promise<{accessToken: string}> {
         const { username, password } = loginDto;
 
         const user = await this.prismaService.user.findUnique({
@@ -38,7 +38,7 @@ export class AuthService {
 
         const accessToken = this.jwtService.sign(payload, { expiresIn: process.env.JWT_EXPIRES_IN });
 
-        return accessToken;
+        return {accessToken: accessToken};
     }
 
     async register(registerDto: CreateUserDto): Promise<string> {

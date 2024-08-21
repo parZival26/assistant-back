@@ -19,4 +19,38 @@ model User {
   password String  @db.VarChar(100)
   email    String  @unique @db.VarChar(100)
   isAdmin  Boolean @default(false)
+
+  EventUser EventUser[]
+}
+
+model Event {
+  id          Int         @id @default(autoincrement())
+  title       String      @db.VarChar(100)
+  description String?     @db.Text
+  initialDate DateTime
+  finalDate   DateTime
+  speaker     String      @db.VarChar(100)
+  location    String      @db.VarChar(100)
+  status      Status      @default(starting_soon)
+  EventUser   EventUser[]
+}
+
+model EventUser {
+  id      Int             @id @default(autoincrement())
+  userId  Int
+  eventId Int
+  status  AssistantStatus @default(pending)
+  User    User            @relation(fields: [userId], references: [id])
+  Event   Event           @relation(fields: [eventId], references: [id])
+}
+
+enum Status {
+  starting_soon
+  ongoing
+  finished
+}
+
+enum AssistantStatus {
+  pending
+  assisted
 }
