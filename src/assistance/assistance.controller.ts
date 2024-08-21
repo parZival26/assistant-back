@@ -3,6 +3,7 @@ import { AssistanceService } from './assistance.service';
 import { AddUsersToEventDto } from './dto/addUsersToEvent.dto';
 import { JwtAdminAuthGuard, JwtAuthGuard } from 'src/auth/auth.guard';
 import { Request } from 'express';
+import { ValidateQrDto } from './dto/validateQr.dto';
 
 
 
@@ -42,6 +43,12 @@ export class AssistanceController {
     return `<img src="${qrCodeDataURL}" alt="QR Code" />`;
   
 
+  }
+
+  @Post("/validateQRCode")
+  @UseGuards(JwtAdminAuthGuard)
+  async validateQRCode(@Body(new ValidationPipe()) body: ValidateQrDto) {
+    return await this.assistanceService.validateQRCode(body.qrCode);
   }
 
 }

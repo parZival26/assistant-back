@@ -36,12 +36,13 @@ model Event {
 }
 
 model EventUser {
-  id      Int             @id @default(autoincrement())
   userId  Int
   eventId Int
   status  AssistantStatus @default(pending)
   User    User            @relation(fields: [userId], references: [id])
   Event   Event           @relation(fields: [eventId], references: [id])
+
+  @@id([userId, eventId])
 }
 
 enum Status {

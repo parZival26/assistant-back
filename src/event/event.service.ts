@@ -36,4 +36,18 @@ export class EventService {
       where: { id }
     })
   }
+
+  async findUserEvents(userId: number) {
+    console.log(userId);
+    
+    return this.prismaService.event.findMany({
+      where: {
+        EventUser: {
+          some: {
+            userId
+          }
+        }
+      }
+    });
+  }
 }
