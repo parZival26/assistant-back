@@ -15,17 +15,45 @@ export class AssistanceService {
   async addUserToEvent(addUsersToEventDto: AddUsersToEventDto) {
     try {
 
-      
-  
-        // Crea la relación entre el usuario y el evento
-      await this.prismaService.eventUser.create({
-        data: {
-            userId: addUsersToEventDto.user,
-            eventId: addUsersToEventDto.event,
-          },
+      const unexistingUsers = []
+      const userAlredyRegistered = []
+
+      addUsersToEventDto.users.forEach(async (user) => {
+        const userExist = await this.prismaService.user.findUnique({
+          where: { id: user },
+          select: {
+            id: true,
+            username: true,
+            email: true
+          }
         });
+
+        if (!userExist) {
+          unexistingUsers.push(user);
+        }
+
+        const eventUserExist = await this.prismaService.eventUser.findFirst({
+          where: {
+            userId: user,
+            eventId: addUsersToEventDto.event
+          }
+        });
+
+        if (eventUserExist) {
+          userAlredyRegistered.push(userExist);
+        }
+
+        await this.prismaService.eventUser.create({
+          data: {
+            userId: user,
+            eventId: addUsersToEventDto.event
+          }
+        });
+      })
+  
       
-      return { message: 'User added to event' };
+      
+      return { message: `Users added to event`, unexistingUsers, userAlredyRegistered };
         
     } catch (error) {
       if (error instanceof PrismaClientKnownRequestError) {

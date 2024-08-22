@@ -12,7 +12,14 @@ export class UserService {
   async create(createUserDto: CreateUserDto) {
     const existing = await this.prismaService.user.findFirst({
       where: {
-          username: createUserDto.username
+          OR: [
+              {
+                  username: createUserDto.username
+              },
+              {
+                  email: createUserDto.email
+              }
+          ]
       }
     });
 
@@ -24,7 +31,16 @@ export class UserService {
   }
 
   async findAll() {
-    return this.prismaService.user.findMany();
+    return this.prismaService.user.findMany({
+      where: {
+        isAdmin: false
+      },
+      select:{
+        id: true,
+        username: true,
+        email: true
+      }
+    });
   }
 
   async findOne(id: number) {
