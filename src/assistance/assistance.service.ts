@@ -182,9 +182,15 @@ export class AssistanceService {
 
 
   async validateQRCode(hashCode: string) {
-      const [userId, eventId, deadLineCode] = decrypt(hashCode).split('-');
+      let decrypted: string;
+      try {
+        decrypted = decrypt(hashCode);
+        
+      } catch (error) {
+        throw new UnprocessableEntityException('Invalid QR Code');
+      }
 
-      console.log(userId, eventId, deadLineCode);
+      const [userId, eventId, deadLineCode] = decrypted.split('-');
       
 
       if (!userId || !eventId || !deadLineCode) {
