@@ -15,10 +15,10 @@ export class AssistanceService {
   async addUserToEvent(addUsersToEventDto: AddUsersToEventDto) {
     try {
 
-      const unexistingUsers = []
-      const userAlredyRegistered = []
+      const unexistingUsers = [];
+      const userAlredyRegistered = [];
 
-      addUsersToEventDto.users.forEach(async (user) => {
+      for (const user of addUsersToEventDto.users) {
         const userExist = await this.prismaService.user.findUnique({
           where: { id: user },
           select: {
@@ -30,17 +30,21 @@ export class AssistanceService {
 
         if (!userExist) {
           unexistingUsers.push(user);
+          continue;
         }
 
-        const eventUserExist = await this.prismaService.eventUser.findFirst({
+        const userRegistered = await this.prismaService.eventUser.findUnique({
           where: {
-            userId: user,
-            eventId: addUsersToEventDto.event
+            userId_eventId: {
+              userId: user,
+              eventId: addUsersToEventDto.event
+            }
           }
         });
 
-        if (eventUserExist) {
-          userAlredyRegistered.push(userExist);
+        if (userRegistered) {
+          userAlredyRegistered.push(user);
+          continue;
         }
 
         await this.prismaService.eventUser.create({
@@ -49,12 +53,9 @@ export class AssistanceService {
             eventId: addUsersToEventDto.event
           }
         });
-      })
-  
-      
-      
+      }
+
       return { message: `Users added to event`, unexistingUsers, userAlredyRegistered };
-        
     } catch (error) {
       if (error instanceof PrismaClientKnownRequestError) {
         if (error.code === 'P2003') {
@@ -73,14 +74,6 @@ export class AssistanceService {
       return this.prismaService.event.findUnique({
         where: { id: eventId },
         select: {
-          id: true,
-          title: true,
-          description: true,
-          initialDate: true,
-          finalDate: true,
-          speaker: true,
-          location: true,
-          status: true,
           EventUser: {
             select: {
               User: {
@@ -89,7 +82,8 @@ export class AssistanceService {
                   username: true,
                   email: true
                 }
-              }
+              },
+              status: true
             }
           }
         }
